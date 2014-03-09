@@ -213,6 +213,13 @@ func parseDSNParams(cfg *config, params string) (err error) {
 			if err != nil {
 				return
 			}
+		
+		// Read/Write Timeout
+		case "interactive_timeout":
+			cfg.interactive_timeout, err = time.ParseDuration(value)
+			if err != nil {
+				return
+			}
 
 		// Dial Timeout
 		case "timeout":

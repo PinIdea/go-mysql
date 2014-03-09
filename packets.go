@@ -26,6 +26,9 @@ import (
 func (mc *mysqlConn) readPacket() ([]byte, error) {
 	var payload []byte
 	for {
+		if mc.cfg.interactive_timeout > 0 {
+			mc.netConn.SetReadDeadline(time.Now().Add(mc.cfg.interactive_timeout))
+		}
 		// Read packet header
 		data, err := mc.buf.readNext(4)
 		if err != nil {
@@ -53,6 +56,9 @@ func (mc *mysqlConn) readPacket() ([]byte, error) {
 		}
 		mc.sequence++
 
+		if mc.cfg.interactive_timeout > 0 {
+			mc.netConn.SetReadDeadline(time.Now().Add(mc.cfg.interactive_timeout))
+		}
 		// Read packet body [pktLen bytes]
 		data, err = mc.buf.readNext(pktLen)
 		if err != nil {
@@ -99,6 +105,9 @@ func (mc *mysqlConn) writePacket(data []byte) error {
 		}
 		data[3] = mc.sequence
 
+		if mc.cfg.interactive_timeout > 0 {
+			mc.netConn.SetWriteDeadline(time.Now().Add(mc.cfg.interactive_timeout))
+		}
 		// Write packet
 		n, err := mc.netConn.Write(data[:4+size])
 		if err == nil && n == 4+size {
